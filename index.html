@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obiayo Oparaugo — System Administrator</title>
+<meta name="description" content="Obiayo Oparaugo — System Administrator specializing in identity, endpoint, and automation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0e13;
+    --bg-raised: #10151c;
+    --panel: #131a22;
+    --border: #1f2b37;
+    --border-bright: #2b3b4a;
+    --text: #e7edf3;
+    --text-dim: #8ea0b0;
+    --text-faint: #55677a;
+    --accent: #45d9c8;
+    --accent-dim: #2a8a80;
+    --amber: #f2b84b;
+    --ok: #4ade80;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+    --radius: 6px;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--bg);
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--accent); color: #04211d; }
+
+  a{ color: var(--accent); text-decoration: none; }
+  a:hover{ text-decoration: underline; }
+
+  .wrap{ max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+  code, .mono{ font-family: var(--mono); }
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10,14,19,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner{
+    max-width: 880px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .nav-brand{
+    font-family: var(--mono); font-size: 14px; font-weight: 600;
+    color: var(--text); display:flex; align-items:center; gap:8px;
+  }
+  .dot{
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 8px var(--ok);
+    display:inline-block;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity: 1; } 50%{ opacity: 0.4; }
+  }
+  .nav-links{
+    display:flex; gap: 22px; font-family: var(--mono); font-size: 13px;
+    color: var(--text-dim);
+  }
+  .nav-links a{ color: var(--text-dim); }
+  .nav-links a:hover{ color: var(--accent); text-decoration:none; }
+  .nav-links span{ color: var(--text-faint); }
+
+  /* ---------- HERO / TERMINAL ---------- */
+  .hero{ padding: 64px 0 40px; }
+  .term{
+    background: var(--panel);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
+  }
+  .term-bar{
+    display:flex; align-items:center; gap: 8px;
+    padding: 10px 14px;
+    background: var(--bg-raised);
+    border-bottom: 1px solid var(--border);
+  }
+  .term-bar .tdot{ width: 10px; height:10px; border-radius:50%; }
+  .tdot.r{ background:#f2554b; } .tdot.y{ background:#f2b84b; } .tdot.g{ background:#4ade80; }
+  .term-title{
+    margin-left: 8px; font-family: var(--mono); font-size: 12px; color: var(--text-faint);
+  }
+  .term-body{ padding: 28px 28px 32px; font-family: var(--mono); }
+  .term-line{ color: var(--text-dim); font-size: 14px; margin-bottom: 6px; }
+  .term-line .prompt{ color: var(--accent); }
+  .term-out{
+    font-family: var(--sans);
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 800;
+    margin: 4px 0 6px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .cursor{
+    display:inline-block; width: 10px; height: 1.05em; background: var(--accent);
+    margin-left: 4px; vertical-align: -0.15em;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity: 0; } }
+  .term-role{
+    font-size: 16px; color: var(--accent); font-weight: 500; margin-bottom: 18px;
+  }
+  .status-row{
+    display:flex; flex-wrap: wrap; gap: 10px 22px;
+    font-size: 13px; color: var(--text-dim); margin-bottom: 22px;
+  }
+  .status-row .item{ display:flex; align-items:center; gap:7px; }
+  .status-row .k{ color: var(--text-faint); }
+
+  .btn-row{ display:flex; flex-wrap: wrap; gap: 12px; }
+  .btn{
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    padding: 10px 16px; border-radius: var(--radius);
+    border: 1px solid var(--border-bright);
+    color: var(--text); background: var(--bg-raised);
+    transition: border-color .15s ease, transform .15s ease, background .15s ease;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn:hover{ text-decoration:none; border-color: var(--accent); transform: translateY(-1px); }
+  .btn.primary{ background: var(--accent); color: #04211d; border-color: var(--accent); font-weight: 600; }
+  .btn.primary:hover{ background: #5be5d5; }
+
+  /* ---------- SECTION HEADERS ---------- */
+  section{ padding: 56px 0; border-top: 1px solid var(--border); }
+  .sec-head{
+    font-family: var(--mono); font-size: 13px; color: var(--accent);
+    margin-bottom: 6px; display:flex; align-items:center; gap: 8px;
+  }
+  .sec-head::before{ content: '>'; color: var(--text-faint); }
+  h2.sec-title{
+    font-size: clamp(22px, 3.4vw, 30px); margin: 0 0 24px;
+    font-weight: 800; letter-spacing: -0.01em;
+  }
+
+  /* ---------- ABOUT ---------- */
+  .about-text{ font-size: 16px; color: var(--text-dim); max-width: 68ch; }
+  .about-text strong{ color: var(--text); font-weight: 600; }
+
+  /* ---------- EXPERIENCE ---------- */
+  .timeline{ position: relative; padding-left: 26px; }
+  .timeline::before{
+    content:''; position:absolute; left: 6px; top: 6px; bottom: 6px;
+    width: 1px; background: var(--border-bright);
+  }
+  .job{ position: relative; margin-bottom: 40px; }
+  .job:last-child{ margin-bottom: 0; }
+  .job::before{
+    content:''; position: absolute; left: -26px; top: 6px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--accent);
+  }
+  .job-head{ display:flex; flex-wrap:wrap; justify-content: space-between; gap: 8px 16px; margin-bottom: 4px; }
+  .job-role{ font-size: 17px; font-weight: 700; color: var(--text); }
+  .job-org{ color: var(--accent); font-weight: 500; }
+  .job-meta{
+    font-family: var(--mono); font-size: 12px; color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .job-loc{ font-size: 13px; color: var(--text-faint); margin-bottom: 12px; }
+  .job ul{ margin: 0; padding-left: 18px; color: var(--text-dim); font-size: 14.5px; }
+  .job li{ margin-bottom: 7px; }
+  .job li::marker{ color: var(--accent-dim); }
+  .badge{
+    display:inline-block; font-family: var(--mono); font-size: 10.5px;
+    padding: 2px 8px; border-radius: 100px; border: 1px solid var(--ok);
+    color: var(--ok); margin-left: 8px; vertical-align: middle;
+  }
+
+  /* ---------- SKILLS ---------- */
+  .skill-groups{ display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 22px; }
+  .skill-group{
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 18px 16px;
+  }
+  .skill-group h3{
+    font-family: var(--mono); font-size: 12px; color: var(--text-faint);
+    text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 12px; font-weight: 600;
+  }
+  .pill-row{ display:flex; flex-wrap: wrap; gap: 8px; }
+  .pill{
+    font-family: var(--mono); font-size: 12.5px; color: var(--text);
+    background: var(--bg-raised); border: 1px solid var(--border-bright);
+    padding: 5px 10px; border-radius: 100px;
+  }
+
+  /* ---------- EDUCATION ---------- */
+  .edu-card{
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 22px; display:flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  .edu-card .school{ font-weight: 700; font-size: 16px; }
+  .edu-card .degree{ color: var(--text-dim); font-size: 14px; margin-top: 3px; }
+  .edu-card .meta{ font-family: var(--mono); font-size: 12px; color: var(--text-faint); text-align: right; }
+
+  /* ---------- PROJECTS ---------- */
+  #repo-status{ font-family: var(--mono); font-size: 13px; color: var(--text-faint); margin-bottom: 18px; }
+  .repo-grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }
+  .repo-card{
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; display:flex; flex-direction: column; gap: 10px;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .repo-card:hover{ border-color: var(--accent); transform: translateY(-2px); }
+  .repo-name{ font-family: var(--mono); font-weight: 600; font-size: 14.5px; color: var(--text); }
+  .repo-desc{ font-size: 13.5px; color: var(--text-dim); flex-grow: 1; }
+  .repo-meta{ display:flex; gap: 14px; font-family: var(--mono); font-size: 11.5px; color: var(--text-faint); }
+  .lang-dot{ width:8px; height:8px; border-radius:50%; background: var(--accent); display:inline-block; margin-right:5px; }
+
+  .empty-state{
+    border: 1px dashed var(--border-bright); border-radius: var(--radius);
+    padding: 36px 24px; text-align: center; color: var(--text-dim);
+  }
+  .empty-state .mono{ color: var(--text-faint); font-size: 12.5px; display:block; margin-bottom: 10px; }
+  .empty-state p{ margin: 0 0 4px; }
+
+  /* ---------- CONTACT / FOOTER ---------- */
+  footer{ padding: 56px 0 40px; border-top: 1px solid var(--border); }
+  .contact-grid{
+    display:flex; flex-wrap: wrap; gap: 14px; margin-bottom: 30px;
+  }
+  .contact-item{
+    display:flex; align-items:center; gap:10px;
+    font-family: var(--mono); font-size: 13.5px;
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 12px 16px; border-radius: var(--radius);
+    color: var(--text);
+  }
+  .contact-item a{ color: var(--text); }
+  .contact-item a:hover{ color: var(--accent); }
+  .contact-item .k{ color: var(--text-faint); }
+  .foot-bottom{
+    font-family: var(--mono); font-size: 12px; color: var(--text-faint);
+    display:flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    padding-top: 20px; border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px){
+    .nav-links{ display:none; }
+    section{ padding: 40px 0; }
+    .term-body{ padding: 22px 18px 26px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .cursor, .dot{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand"><span class="dot"></span>obiayo_oparaugo</div>
+    <nav class="nav-links">
+      <a href="#about">about</a>
+      <a href="#experience">experience</a>
+      <a href="#skills">skills</a>
+      <a href="#projects">projects</a>
+      <a href="#contact">contact</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero" style="border-top:none;">
+    <div class="term">
+      <div class="term-bar">
+        <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+        <span class="term-title">obiayo@systems: ~</span>
+      </div>
+      <div class="term-body">
+        <div class="term-line"><span class="prompt">$</span> whoami</div>
+        <div class="term-out" id="typed-name"></div>
+        <div class="term-role">System Administrator — Identity, Endpoint &amp; Automation</div>
+
+        <div class="term-line"><span class="prompt">$</span> status --check</div>
+        <div class="status-row">
+          <span class="item"><span class="dot" style="box-shadow:0 0 6px var(--ok);"></span> active</span>
+          <span class="item"><span class="k">location:</span> Las Vegas, NV</span>
+          <span class="item"><span class="k">uptime:</span> <span id="uptime">—</span> since Jan 2024</span>
+        </div>
+
+        <div class="btn-row">
+          <a class="btn primary" href="#contact">contact_me()</a>
+          <a class="btn" href="https://github.com/obiayooparaugo-creator" target="_blank" rel="noopener">view --github</a>
+          <a class="btn" href="Obiayo_Oparaugo_Resume.pdf" download>download --resume.pdf</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="sec-head">cat about.md</div>
+    <h2 class="sec-title">About</h2>
+    <p class="about-text">
+      I'm a <strong>System Administrator</strong> based in Las Vegas, NV, focused on keeping enterprise
+      identity, endpoints, and onboarding pipelines running smoothly &mdash; and automated wherever possible.
+      Currently at <strong>Libra Solutions Group</strong>, I drive endpoint, identity, and compliance
+      automation across a multi-domain environment using <strong>PowerShell</strong> and <strong>Microsoft Intune</strong>,
+      and have architected onboarding systems supporting <strong>800+ users</strong> through a 35% workforce
+      expansion. Before that, I ran onsite and remote IT support for large-scale live events at
+      <strong>Convexx Event Management</strong>. I like solving problems where infrastructure, security, and
+      people intersect.
+    </p>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="sec-head">experience --list --sort=recent</div>
+    <h2 class="sec-title">Experience</h2>
+
+    <div class="timeline">
+      <div class="job">
+        <div class="job-head">
+          <div><span class="job-role">System Administrator</span> <span class="badge">current</span><br>
+          <span class="job-org">Libra Solutions Group</span></div>
+          <div class="job-meta">JAN 2024 — PRESENT</div>
+        </div>
+        <div class="job-loc">Las Vegas, Nevada</div>
+        <ul>
+          <li>Drive endpoint, identity, and compliance automation across a multi-domain enterprise environment using PowerShell and Intune.</li>
+          <li>Partner with cross-functional teams, vendors, and engineers to diagnose and resolve complex technical issues across enterprise infrastructure.</li>
+          <li>Build PowerShell automation for end-to-end onboarding/offboarding, including Microsoft 365 license provisioning and deprovisioning.</li>
+          <li>Establish baseline Microsoft Intune MDM compliance and security policies, then administer enforcement across a multi-domain, multi-OS device fleet.</li>
+          <li>Architected a PowerShell-automated, multi-domain Active Directory onboarding system for 800+ users, streamlining identity provisioning to support a 35% workforce expansion.</li>
+          <li>Train and manage help desk teams on ticket triage, reducing average resolution time from 2&ndash;3 hours to under 1 hour.</li>
+          <li>Own device lifecycle management end to end, including secure decommissioning, license auditing, and inventory accuracy across the fleet.</li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-head">
+          <div><span class="job-role">IT Support Specialist</span><br>
+          <span class="job-org">Convexx Event Management</span></div>
+          <div class="job-meta">MAR 2022 — JAN 2024</div>
+        </div>
+        <div class="job-loc">Las Vegas, Nevada</div>
+        <ul>
+          <li>Administered customer and vendor databases, maintaining data integrity and improving overall user experience.</li>
+          <li>Owned all onsite and remote IT support operations for large-scale business events, troubleshooting infrastructure issues under high-demand conditions.</li>
+          <li>Onboarded and trained users on new server and database technologies, accelerating adoption and reducing recurring support tickets.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="sec-head">skills --group-by=category</div>
+    <h2 class="sec-title">Skills</h2>
+    <div class="skill-groups">
+      <div class="skill-group">
+        <h3>Identity &amp; Access</h3>
+        <div class="pill-row">
+          <span class="pill">Active Directory</span>
+          <span class="pill">Identity Management</span>
+          <span class="pill">Microsoft Intune</span>
+          <span class="pill">O365</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>Endpoint &amp; Infrastructure</h3>
+        <div class="pill-row">
+          <span class="pill">Windows 10/11</span>
+          <span class="pill">Windows Server</span>
+          <span class="pill">Mac OS X</span>
+          <span class="pill">Networking</span>
+          <span class="pill">Inventory Management</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>Automation &amp; Scripting</h3>
+        <div class="pill-row">
+          <span class="pill">PowerShell</span>
+          <span class="pill">Automation</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>Cloud &amp; Collaboration</h3>
+        <div class="pill-row">
+          <span class="pill">Microsoft Azure</span>
+          <span class="pill">Exchange</span>
+          <span class="pill">Teams / Zoom</span>
+          <span class="pill">TeamViewer</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>Tools &amp; Leadership</h3>
+        <div class="pill-row">
+          <span class="pill">Jira</span>
+          <span class="pill">Leadership</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDUCATION -->
+  <section id="education">
+    <div class="sec-head">cat education.log</div>
+    <h2 class="sec-title">Education</h2>
+    <div class="edu-card">
+      <div>
+        <div class="school">University of Nevada, Reno</div>
+        <div class="degree">B.S., Business Administration &ndash; Information Systems</div>
+      </div>
+      <div class="meta">Reno, Nevada<br>Graduated Dec 2021</div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="sec-head">github fetch --user=obiayooparaugo-creator --live</div>
+    <h2 class="sec-title">Projects</h2>
+    <div id="repo-status">connecting to api.github.com…</div>
+    <div id="repo-grid" class="repo-grid"></div>
+  </section>
+
+  <!-- CONTACT -->
+  <footer id="contact">
+    <div class="sec-head">contact --init</div>
+    <h2 class="sec-title">Get in touch</h2>
+    <div class="contact-grid">
+      <div class="contact-item"><span class="k">email:</span> <a href="mailto:obiayo98@gmail.com">obiayo98@gmail.com</a></div>
+      <div class="contact-item"><span class="k">phone:</span> <a href="tel:+17028587324">702-858-7324</a></div>
+      <div class="contact-item"><span class="k">location:</span> Las Vegas, NV</div>
+      <div class="contact-item"><span class="k">github:</span> <a href="https://github.com/obiayooparaugo-creator" target="_blank" rel="noopener">obiayooparaugo-creator</a></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span id="year"></span> Obiayo Oparaugo</span>
+      <span>built with HTML / CSS / JS</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // typing effect for name
+  const name = "Obiayo Oparaugo";
+  const el = document.getElementById('typed-name');
+  let i = 0;
+  function type(){
+    if(i <= name.length){
+      el.innerHTML = name.slice(0,i) + '<span class="cursor"></span>';
+      i++;
+      setTimeout(type, 65);
+    } else {
+      el.innerHTML = name + '<span class="cursor"></span>';
+    }
+  }
+  type();
+
+  // uptime counter since Jan 1 2024
+  function updateUptime(){
+    const start = new Date('2024-01-01T00:00:00');
+    const now = new Date();
+    const days = Math.floor((now - start) / (1000*60*60*24));
+    document.getElementById('uptime').textContent = days + 'd';
+  }
+  updateUptime();
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // live GitHub repo fetch
+  const GH_USER = 'obiayooparaugo-creator';
+  const statusEl = document.getElementById('repo-status');
+  const gridEl = document.getElementById('repo-grid');
+
+  fetch(`https://api.github.com/users/${GH_USER}/repos?sort=updated&per_page=12`)
+    .then(res => {
+      if(!res.ok) throw new Error('GitHub API error: ' + res.status);
+      return res.json();
+    })
+    .then(repos => {
+      const visible = repos.filter(r => !r.fork);
+      if(visible.length === 0){
+        statusEl.textContent = `connected — 0 public repositories found`;
+        gridEl.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <span class="mono">[ no data ]</span>
+            <p>No repositories published yet.</p>
+            <p>This section pulls live from GitHub — new repos will show up here automatically once pushed.</p>
+          </div>`;
+        return;
+      }
+      statusEl.textContent = `connected — ${visible.length} public repositories`;
+      gridEl.innerHTML = visible.map(r => `
+        <div class="repo-card">
+          <div class="repo-name">${r.name}</div>
+          <div class="repo-desc">${r.description ? escapeHtml(r.description) : 'No description provided.'}</div>
+          <div class="repo-meta">
+            ${r.language ? `<span><span class="lang-dot"></span>${r.language}</span>` : ''}
+            <span>★ ${r.stargazers_count}</span>
+            <span>updated ${new Date(r.pushed_at).toLocaleDateString()}</span>
+          </div>
+          <a class="btn" style="align-self:flex-start;" href="${r.html_url}" target="_blank" rel="noopener">view --repo</a>
+        </div>
+      `).join('');
+    })
+    .catch(err => {
+      statusEl.textContent = 'could not reach GitHub API — showing static link instead';
+      gridEl.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <span class="mono">[ connection failed ]</span>
+          <p>Live repo data couldn't be loaded right now.</p>
+          <p><a href="https://github.com/${GH_USER}" target="_blank" rel="noopener">View the GitHub profile directly →</a></p>
+        </div>`;
+    });
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
+
+</body>
+</html>
